@@ -2,11 +2,11 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { Helper } from './helper';
-import {ThinQ} from './lib/ThinQ';
-import {EventEmitter} from 'events';
-import {PlatformType} from './lib/constants';
-import {ManualProcessNeeded, NotConnectedError} from './errors';
-import {Device} from './lib/Device';
+import { ThinQ } from './lib/ThinQ';
+import { EventEmitter } from 'events';
+import { PlatformType } from './lib/constants';
+import { ManualProcessNeeded, NotConnectedError } from './errors';
+import { Device } from './lib/Device';
 import Characteristics from './characteristics';
 
 /**
@@ -119,11 +119,11 @@ export class LGThinQHomebridgePlatform implements DynamicPlatformPlugin {
         continue;
       }
 
-      this.log.info('['+device.name+'] Setting up device!');
+      this.log.info('[' + device.name + '] Setting up device!');
       const setupSuccess = await this.ThinQ.setup(device);
 
       if (!setupSuccess) {
-        this.log.warn('['+device.name+'] Failed to setup device!');
+        this.log.warn('[' + device.name + '] Failed to setup device!');
         continue;
       }
 
@@ -187,7 +187,7 @@ export class LGThinQHomebridgePlatform implements DynamicPlatformPlugin {
           devices.filter(device => device.platform === PlatformType.ThinQ2).forEach(device => {
             // only emit if device online
             if (device.snapshot.online) {
-              this.events.emit('refresh.'+device.id, device.snapshot);
+              this.events.emit('refresh.' + device.id, device.snapshot);
             }
           });
         });
@@ -198,11 +198,12 @@ export class LGThinQHomebridgePlatform implements DynamicPlatformPlugin {
       thinq2devices.forEach(accessory => {
         const device: Device = accessory.context.device;
         refreshList[device.id] = setTimeout(() => {
-          this.events.once('refresh.'+device.id, (snapshot) => {
+          this.events.once('refresh.' + device.id, (snapshot) => {
+            this.log.info(`received device ${device.id} data: `, snapshot);
             this.events.emit(device.id, snapshot);
             refreshList[device.id].refresh();
           });
-        }, 300000);
+        }, 60000);
       });
 
       this.log.info('Start MQTT listener for thinq2 device');
@@ -222,7 +223,7 @@ export class LGThinQHomebridgePlatform implements DynamicPlatformPlugin {
     }
 
     // polling thinq1 device
-    this.log.info('Start polling device data every '+ this.config.refresh_interval +' second.');
+    this.log.info('Start polling device data every ' + this.config.refresh_interval + ' second.');
     const ThinQ = this.ThinQ;
     const interval = setInterval(async () => {
       try {
